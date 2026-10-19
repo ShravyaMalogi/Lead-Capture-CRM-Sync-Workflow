@@ -44,7 +44,7 @@ When a lead is submitted, the workflow formats and validates the data. Valid lea
 
 If validation fails, the lead follows the **Invalid Lead Response** path instead of continuing through the valid-lead route.
 
-## 🖼️ Workflow Screenshots
+## 🖼️ Workflow
 
 The screenshots below show the workflow paths, Google Sheets records, notifications, and invalid-input handling.
 
@@ -144,35 +144,8 @@ Replace the URL with the webhook URL shown by your n8n instance.
 
 The email check is a basic validation rule; it does not guarantee that an address exists or can receive mail.
 
-## 🔐 Security Notes
-
-- Never commit API tokens, Telegram bot tokens, OAuth secrets, passwords, or access tokens.
-- Use placeholders for private spreadsheet IDs and chat IDs in public examples.
-- Use fictional sample leads in screenshots and test data.
-- Hide personal information and sensitive configuration in screenshots.
-- Store account credentials in n8n's credential manager rather than hardcoding secrets in workflow nodes.
-
-## 🚀 Possible Improvements
-
-- Add stronger email validation and input sanitization.
-- Add retry logic and error handling for failed integrations.
-- Record timestamps and more detailed execution statuses.
-- Add lead status tracking and follow-up reminders.
-- Build a dashboard to analyze lead volume and workflow performance.
-
 ## 📚 What This Project Demonstrates
 
 This project provides hands-on experience with workflow automation, webhook integration, conditional routing, data validation, spreadsheet-based CRM operations, and connecting communication tools.
 
 It demonstrates how several everyday services can be coordinated into a single automated lead management process.
-
----
-
-<div align="center">
-
-**Built by Shravya Malogi**  
-Hyderabad, India
-
-*Designed to explore practical workflow automation and service integration.*
-
-</div>
