@@ -1,0 +1,507 @@
+{
+  "name": "Lead Capture & CRM Sync Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-capture",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5d47f43f-104d-44da-8db6-f5b3c674be73",
+      "name": "Lead Webhook",
+      "webhookId": "9fd5bc70-2d05-4544-b55d-28c275963ad0"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "05c8547d-cf69-4aa5-92ee-8d99ad700359",
+              "name": "name",
+              "value": "={{ $json.body.name.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "59f5a775-19a4-49a7-8973-ef3f13ce1a54",
+              "name": "email",
+              "value": "={{ $json.body.email.trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "b5111f10-fe81-4c4e-b746-1e4c38aed1e2",
+              "name": "company",
+              "value": "={{ $json.body.company || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "de49e24e-6fad-4327-8a04-dfc63f5e9771",
+              "name": "service",
+              "value": "={{ $json.body.service || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "1118de8a-9e16-4196-a66d-68ca5d2bf3ca",
+              "name": "message",
+              "value": "={{ $json.body.message || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "08124188-7a7e-424a-b37c-54564e61370b",
+              "name": "source",
+              "value": "={{ $json.body.source || 'Website' }}",
+              "type": "string"
+            },
+            {
+              "id": "272e20eb-6367-4e78-b3a6-fe7388249a9e",
+              "name": "updated_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "e9b2298c-2388-44e5-9ad0-258679c5a50d",
+              "name": "status",
+              "value": "New",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        192,
+        0
+      ],
+      "id": "d5b611b3-8b14-417e-8a7c-75ad8531482c",
+      "name": "Format Lead"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87911c8f-411b-4a6c-8f8e-6ff159f7f745",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "780b1b2e-a71e-4c28-a64c-209232624320",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a8f5c651-fc99-4484-93cd-7bf7c7b019e5",
+      "name": "Validate Lead"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Lead CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Format Lead').item.json.email }}",
+            "name": "={{ $('Format Lead').item.json.name }}",
+            "company": "={{ $('Format Lead').item.json.company }}",
+            "service": "={{ $('Format Lead').item.json.service }}",
+            "message": "={{ $('Format Lead').item.json.message }}",
+            "source": "={{ $('Format Lead').item.json.source }}",
+            "updated_at": "={{ $('Format Lead').item.json.updated_at }}",
+            "status": "={{ $('Format Lead').item.json.status }}"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        -176
+      ],
+      "id": "e440e9e6-e23c-4bcc-b974-eb5f6132280d",
+      "name": "Upsert Lead CRM",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qA1Wwd8WAchTAUyI",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"message\": \"Please provide a valid name and email address.\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        128
+      ],
+      "id": "48f4deef-71e7-49b1-b357-a78522aa4c41",
+      "name": "Invalid Lead Response"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Format Lead').item.json.email }}",
+        "subject": "We've received your enquiry",
+        "message": "=Hi {{ $('Format Lead').item.json.name }},  \n\nThank you for contacting us about {{ $('Format Lead').item.json.service }}.\n\nWe've received your enquiry, and our team will review it shortly. We'll get back to you as soon as possible.  \n\nBest regards,   \nThe Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -176
+      ],
+      "id": "e3fb387e-df52-4dae-a45c-30a24532a400",
+      "name": "Send Confirmation",
+      "webhookId": "58aa9099-a4cc-49a8-a742-00418e7ebc72",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4NtDc1FZe0WuSQjG",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "=🔔 NEW LEAD RECEIVED \nName: {{ $('Format Lead').item.json.name }} \nEmail: {{ $('Format Lead').item.json.email }} \nCompany: {{ $('Format Lead').item.json.company }} \nService: {{ $('Format Lead').item.json.service }} \n\nMessage: {{ $('Format Lead').item.json.message }}  \n\nSource: {{ $('Format Lead').item.json.source }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1184,
+        -176
+      ],
+      "id": "ef8186c3-96bc-49b2-ae29-20aef5422770",
+      "name": "Notify Team",
+      "webhookId": "920ebe1d-beb6-400b-b7fd-fc7d520db732",
+      "credentials": {
+        "telegramApi": {
+          "id": "dbSHcCAk2Y7gKJ6P",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "Lead CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 280550370,
+          "mode": "list",
+          "cachedResultName": "Activity Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit#gid=280550370"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "email": "={{ $('Format Lead').item.json.email }}",
+            "action": "Lead processed",
+            "source": "={{ $('Format Lead').item.json.source }}",
+            "result": "CRM upsert successful"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        960,
+        -400
+      ],
+      "id": "37fb3eeb-a439-4a2d-81b6-8880dab79b07",
+      "name": "Log Result",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qA1Wwd8WAchTAUyI",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Lead": {
+      "main": [
+        [
+          {
+            "node": "Validate Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Lead": {
+      "main": [
+        [
+          {
+            "node": "Upsert Lead CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Lead Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Lead CRM": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Notify Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Result": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dfc798c3-04f5-4dd1-b91d-b53ce41fac69",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "KtsZOUZX9e1aSqqW",
+  "tags": [
+    {
+      "name": "n8n-inter-projects",
+      "id": "8ku9ZOeyzdVj4hdq",
+      "updatedAt": "2026-10-19T19:42:43.872Z",
+      "createdAt": "2026-10-19T19:42:43.872Z"
+    }
+  ]
+}
